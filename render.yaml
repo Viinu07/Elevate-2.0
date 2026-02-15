@@ -1,0 +1,34 @@
+services:
+  # Backend Service (Docker)
+  - type: web
+    name: elevate-backend
+    runtime: docker
+    rootDir: backend
+    envVars:
+      - key: POSTGRES_SERVER
+        sync: false # Render will ask for this value securely
+      - key: POSTGRES_USER
+        sync: false # Render will ask for this value securely
+      - key: POSTGRES_PASSWORD
+        sync: false # Render will ask for this value securely
+      - key: POSTGRES_DB
+        sync: false # Render will ask for this value securely
+      - key: POSTGRES_PORT
+        value: 5432
+      - key: PORT
+        value: 8000
+    plan: free
+
+  # Frontend Service (Static Site)
+  - type: web
+    name: elevate-frontend
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run preview -- --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: elevate-backend
+          property: host
+    plan: free

@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-elevate_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-elevate_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-elevate_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: elevate_backend
+    restart: always
+    depends_on:
+      - db
+    environment:
+      POSTGRES_SERVER: db
+      POSTGRES_USER: ${POSTGRES_USER:-elevate_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-elevate_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-elevate_db}
+      POSTGRES_PORT: 5432
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: elevate_frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:
