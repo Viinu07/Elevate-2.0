@@ -31,6 +31,10 @@ async def main():
         print(access_token)
         print("="*50)
         
+        with open("access_token.txt", "w") as f:
+            f.write(access_token)
+        print("Token saved to backend/access_token.txt")
+        
         print("\nTo test with curl:")
         print(f'curl -H "Authorization: Bearer {access_token}" https://elevate-2-0-roan.vercel.app/api/v2/auth/me')
 
