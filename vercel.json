@@ -1,10 +1,6 @@
 {
     "builds": [
         {
-            "src": "api/index.py",
-            "use": "@vercel/python"
-        },
-        {
             "src": "package.json",
             "use": "@vercel/static-build",
             "config": {
@@ -16,7 +12,7 @@
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "/api/index.py"
+            "destination": "https://elevate.fly.dev/api/$1"
         },
         {
             "source": "/(.*)",
