@@ -6,6 +6,7 @@ from app.models.v2.work_item import WorkItem
 from app.models.v2.task import Task
 from app.models.event import Event
 from app.models.user import User
+from typing import List
 
 async def search_all(db: AsyncSession, query: str) -> List[SearchResult]:
     results = []

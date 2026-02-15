@@ -11,6 +11,13 @@ engine = create_async_engine(
     connect_args={
         "statement_cache_size": 0,
         "prepared_statement_cache_size": 0,
+        "server_settings": {
+            "application_name": settings.PROJECT_NAME,
+        },
+        # Supabase/Cloud DBs require SSL.
+        # For local dev, this might fail if DB doesn't support SSL, so we might make it conditional later.
+        # But for Vercel -> Supabase, it is REQUIRED.
+        "ssl": "require",  
     }
 )
 
