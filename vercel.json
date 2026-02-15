@@ -1,6 +1,10 @@
 {
     "builds": [
         {
+            "src": "api/index.py",
+            "use": "@vercel/python"
+        },
+        {
             "src": "package.json",
             "use": "@vercel/static-build",
             "config": {
@@ -8,11 +12,10 @@
             }
         }
     ],
-    "installCommand": "pip install fastapi==0.109.0 uvicorn==0.27.0 sqlalchemy==2.0.25 alembic==1.13.1 asyncpg==0.29.0 pydantic==2.6.0 pydantic-settings==2.1.0 python-multipart==0.0.9 httpx==0.26.0 email-validator==2.1.0",
     "rewrites": [
         {
             "source": "/api/(.*)",
-            "destination": "https://elevate.fly.dev/api/$1"
+            "destination": "/api/index.py"
         },
         {
             "source": "/(.*)",
