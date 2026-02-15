@@ -1,4 +1,5 @@
 import v2Client from './client';
+import type { CommentResponse } from './types';
 
 export interface Comment {
     id: string;

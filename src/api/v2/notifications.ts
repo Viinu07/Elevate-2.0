@@ -3,13 +3,13 @@ import type { NotificationResponse, NotificationPreferenceResponse } from './typ
 
 export const notificationsAPI = {
     list: async (unreadOnly: boolean = false): Promise<NotificationResponse[]> => {
-        const response = await v2Client.get('/notifications/', { params: { unread_only: unreadOnly } });
-        return response.data;
+        const response = await v2Client.get('/notifications/', { params: { unread_only: String(unreadOnly) } });
+        return response.data as NotificationResponse[];
     },
 
     markRead: async (id: string): Promise<NotificationResponse> => {
         const response = await v2Client.patch(`/notifications/${id}/read`);
-        return response.data;
+        return response.data as NotificationResponse;
     },
 
     markAllRead: async (): Promise<void> => {
@@ -18,6 +18,6 @@ export const notificationsAPI = {
 
     getPreferences: async (): Promise<NotificationPreferenceResponse[]> => {
         const response = await v2Client.get('/notifications/preferences');
-        return response.data;
+        return response.data as NotificationPreferenceResponse[];
     },
 };

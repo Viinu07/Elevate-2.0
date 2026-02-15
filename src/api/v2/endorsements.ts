@@ -1,5 +1,5 @@
 import v2Client from './client';
-import type { EndorsementCreate, EndorsementResponse, CommentCreate, CommentResponse } from './types';
+import type { EndorsementCreate, EndorsementResponse, CommentResponse } from './types';
 
 export const endorsementsAPI = {
     // Create endorsement
