@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { eventsAPI } from '../../../../api/v2/events';
 import type { EventDetailResponse } from '../../../../api/v2/types';
-import { EventStatus } from '../../../../api/v2/types';
 import { StatusBadge } from '../../../../shared/components/v2/StatusBadge';
 import { ParticipantList } from './ParticipantList';
 import { LinkedReleasesList } from './LinkedReleasesList';

@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { searchAPI } from '../../../../api/v2/search';
-import type { SearchResult } from '../../../../api/v2/types';
-import { SearchResultType } from '../../../../api/v2/types';
+import { searchAPI } from '../../../api/v2/search';
+import type { SearchResult } from '../../../api/v2/types';
+import { SearchResultType } from '../../../api/v2/types';
 import { Loader2 } from 'lucide-react';
 
 export const SearchResultsPage: React.FC = () => {

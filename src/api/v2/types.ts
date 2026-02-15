@@ -101,6 +101,8 @@ export interface Event {
     has_awards?: boolean;
     voting_required?: boolean;
     award_categories?: string;
+    expectations?: string;
+    notes?: string;
 }
 
 export interface EventDetailResponse extends Event {
@@ -295,6 +297,17 @@ export interface DashboardMetrics {
 export interface VelocityMetric {
     period: string;
     points: number;
+}
+
+export interface ReleaseTrendMetric {
+    month: string;
+    success_rate: number;
+    avg_health: number;
+}
+
+export interface EndorsementInsight {
+    value: string;
+    count: number;
 }
 
 // Tasks

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { endorsementsAPI } from '@/api/v2/endorsements';
 import type { EndorsementResponse } from '@/api/v2/types';
-import { Award, Heart, MessageCircle, Filter, Search } from 'lucide-react';
+import { Award, Heart, MessageCircle, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const RecognitionWall = () => {

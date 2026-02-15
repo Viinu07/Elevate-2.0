@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { analyticsAPI } from '../../../../api/v2/analytics';
-import type { ReleaseTrendMetric, EndorsementInsight, RiskItem } from '../../../../api/v2/types';
+import { analyticsAPI } from '../../../api/v2/analytics';
+import type { ReleaseTrendMetric, EndorsementInsight, RiskItem } from '../../../api/v2/types';
 
 export const AdvancedAnalyticsPage: React.FC = () => {
     const [trends, setTrends] = useState<ReleaseTrendMetric[]>([]);

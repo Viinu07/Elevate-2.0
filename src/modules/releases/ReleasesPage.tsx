@@ -3,8 +3,8 @@ import { releaseService, type ReleaseWorkItem } from '../../api/releaseService';
 import { userService, type User } from '../../api/userService';
 import { StatusModal } from '@/modules/common/components/StatusModal';
 
-import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Calendar, CheckCircle2 } from 'lucide-react';
+
+import { Calendar, CheckCircle2 } from 'lucide-react';
 
 // --- Types ---
 interface TestingGate {

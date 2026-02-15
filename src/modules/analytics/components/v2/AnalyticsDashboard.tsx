@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { releaseService, type ReleaseWorkItem } from '../../../../api/releaseService';
 import { analyticsAPI } from '../../../../api/v2/analytics';
-import { releasesAPI } from '../../../../api/v2/releases';
-import type { DashboardMetrics, ReleaseResponse } from '../../../../api/v2/types';
+
+import type { DashboardMetrics } from '../../../../api/v2/types';
 import { ChevronLeft, ChevronRight, Rocket, Calendar as CalendarIcon, FileText, CheckCircle2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -10,14 +10,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 export const AnalyticsDashboard: React.FC = () => {
 
     const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-    const [releases, setReleases] = useState<ReleaseResponse[]>([]);
     const [workItems, setWorkItems] = useState<ReleaseWorkItem[]>([]);
     const [loading, setLoading] = useState(true);
 
     // Calendar State
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    const [view, setView] = useState<'daily' | 'weekly'>('daily');
     const [selectedItem, setSelectedItem] = useState<any>(null);
     const [currentPulseIndex, setCurrentPulseIndex] = useState(0);
 
@@ -25,13 +23,11 @@ export const AnalyticsDashboard: React.FC = () => {
         const fetchData = async () => {
             try {
                 // Removed velocity metrics fetch as it's no longer needed
-                const [metricsData, releasesData, workItemsData] = await Promise.all([
+                const [metricsData, workItemsData] = await Promise.all([
                     analyticsAPI.getDashboardMetrics(),
-                    releasesAPI.list({ limit: 100 }),
                     releaseService.getAll()
                 ]);
                 setMetrics(metricsData);
-                setReleases(releasesData);
                 setWorkItems(workItemsData);
             } catch (err) {
                 console.error('Failed to load analytics', err);

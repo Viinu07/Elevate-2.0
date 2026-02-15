@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { notificationsAPI } from '../../../../api/v2/notifications';
 import type { NotificationResponse } from '../../../../api/v2/types';
-import { NotificationType } from '../../../../api/v2/types';
 import { Bell } from 'lucide-react';
 
 export const NotificationCenter: React.FC = () => {
@@ -47,14 +46,7 @@ export const NotificationCenter: React.FC = () => {
         }
     };
 
-    const getTypeColor = (type: NotificationType) => {
-        switch (type) {
-            case NotificationType.ERROR: return 'bg-red-50 text-red-700 border-red-100';
-            case NotificationType.SUCCESS: return 'bg-green-50 text-green-700 border-green-100';
-            case NotificationType.WARNING: return 'bg-yellow-50 text-yellow-700 border-yellow-100';
-            default: return 'bg-blue-50 text-blue-700 border-blue-100';
-        }
-    };
+
 
     return (
         <div className="relative">

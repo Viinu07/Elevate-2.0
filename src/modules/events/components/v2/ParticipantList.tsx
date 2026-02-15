@@ -1,5 +1,6 @@
 import React from 'react';
-import { ParticipantResponse, RSVPStatus } from '../../../../api/v2/types';
+import { RSVPStatus } from '../../../../api/v2/types';
+import type { ParticipantResponse } from '../../../../api/v2/types';
 
 interface ParticipantListProps {
     participants: ParticipantResponse[];
