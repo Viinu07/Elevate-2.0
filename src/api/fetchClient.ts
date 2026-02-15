@@ -3,6 +3,9 @@ const getBaseUrl = () => {
     // In production (Render), VITE_API_URL might be provided by the backend service link
     const apiUrl = import.meta.env.VITE_API_URL;
     if (apiUrl) {
+        if (apiUrl.startsWith('/')) {
+            return `${apiUrl}/v1`;
+        }
         // If it's just a hostname (from Render 'host' property), add https://
         if (!apiUrl.startsWith('http')) {
             return `https://${apiUrl}/api/v1`;
