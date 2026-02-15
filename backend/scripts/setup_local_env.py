@@ -1,7 +1,10 @@
 import os
 import sys
-import psycopg2
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+try:
+    import psycopg2
+    from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+except ImportError:
+    psycopg2 = None
 import subprocess
 
 # Add backend directory to path
@@ -20,6 +23,12 @@ def setup_local_db():
     target_db = "Elevate"
 
     try:
+        if psycopg2 is None:
+            print("Error: 'psycopg2' module is missing.")
+            print("This script requires 'psycopg2' to create the database.")
+            print("Please install it manually if you need to run this setup: pip install psycopg2-binary")
+            return
+
         print(f"Connecting to PostgreSQL at {params['host']}...")
         conn = psycopg2.connect(**params)
         conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
