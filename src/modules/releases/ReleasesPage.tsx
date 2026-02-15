@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { releaseService, type ReleaseWorkItem } from '../../api/releaseService';
 import { userService, type User } from '../../api/userService';
+import { StatusModal } from '@/modules/common/components/StatusModal';
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Calendar, CheckCircle2 } from 'lucide-react';
@@ -64,7 +65,19 @@ export default function ReleasesPage() {
     const [workItems, setWorkItems] = useState<WorkItem[]>([]);
     const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+
+    // Status Modal State
+    const [statusModal, setStatusModal] = useState<{
+        isOpen: boolean;
+        type: 'success' | 'error' | 'info';
+        title: string;
+        message: string;
+    }>({
+        isOpen: false,
+        type: 'info',
+        title: '',
+        message: ''
+    });
 
     // Form State
     const [formData, setFormData] = useState<Partial<ReleaseWorkItem>>({
@@ -140,7 +153,12 @@ export default function ReleasesPage() {
 
     const handleCreateItem = async () => {
         if (!formData.title) {
-            alert('Please enter a title');
+            setStatusModal({
+                isOpen: true,
+                type: 'error',
+                title: 'Missing Information',
+                message: 'Please enter a title for the work item.'
+            });
             return;
         }
 
@@ -185,7 +203,12 @@ export default function ReleasesPage() {
                 is_completed: false,
                 release_date: ''
             });
-            setShowSuccessDialog(true);
+            setStatusModal({
+                isOpen: true,
+                type: 'success',
+                title: 'Success!',
+                message: 'Work item has been successfully created and added to the tracker.'
+            });
         } catch (error) {
             console.error('Failed to create work item:', error);
         }
@@ -196,8 +219,8 @@ export default function ReleasesPage() {
 
 
     return (
-        <div className="h-full flex flex-col p-8 overflow-y-auto w-full">
-            <div className="flex justify-between items-end mb-8">
+        <div className="h-full flex flex-col p-4 md:p-8 overflow-y-auto w-full">
+            <div className="flex justify-between items-end mb-6 md:mb-8">
                 <div>
                     <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2 tracking-tight">Releases</h1>
                     <p className="text-lg text-slate-500 dark:text-slate-400">Manage release cycles and work items.</p>
@@ -497,42 +520,14 @@ export default function ReleasesPage() {
                     </div>
                 )
             }
-            {/* Success Dialog */}
-            <AnimatePresence>
-                {showSuccessDialog && (
-                    <>
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
-                            onClick={() => setShowSuccessDialog(false)}
-                        />
-                        <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                                className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-2xl border border-slate-100 dark:border-slate-700 max-w-sm w-full text-center pointer-events-auto"
-                            >
-                                <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <Check className="w-10 h-10 text-green-600 dark:text-green-400" strokeWidth={3} />
-                                </div>
-                                <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Success!</h3>
-                                <p className="text-slate-500 dark:text-slate-400 mb-8">
-                                    Work item has been successfully created and added to the tracker.
-                                </p>
-                                <button
-                                    onClick={() => setShowSuccessDialog(false)}
-                                    className="w-full py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-bold hover:scale-[1.02] transition-transform"
-                                >
-                                    Awesome
-                                </button>
-                            </motion.div>
-                        </div>
-                    </>
-                )}
-            </AnimatePresence>
+            {/* Status Modal */}
+            <StatusModal
+                isOpen={statusModal.isOpen}
+                onClose={() => setStatusModal({ ...statusModal, isOpen: false })}
+                type={statusModal.type}
+                title={statusModal.title}
+                message={statusModal.message}
+            />
 
 
         </div >

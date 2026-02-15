@@ -21,6 +21,8 @@ import { RSVPStatus } from '@/api/v2/types';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/store';
 import { Send } from 'lucide-react';
+import { VotingPoll } from '../components/VotingPoll';
+import { StatusModal } from '@/modules/common/components/StatusModal';
 
 
 export const EventDetailsPage = () => {
@@ -29,8 +31,22 @@ export const EventDetailsPage = () => {
     const currentUser = useSelector((state: RootState) => state.user.data);
     const [event, setEvent] = useState<EventDetailResponse | null>(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState<'overview' | 'participants' | 'discussion' | 'awards'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'participants' | 'discussion' | 'awards' | 'vote'>('overview');
     const [isGrantAwardModalOpen, setIsGrantAwardModalOpen] = useState(false);
+    const [grantAwardInitialData, setGrantAwardInitialData] = useState({ category: '', userId: '' });
+
+    // Status Modal State
+    const [statusModal, setStatusModal] = useState<{
+        isOpen: boolean;
+        type: 'success' | 'error' | 'info';
+        title: string;
+        message: string;
+    }>({
+        isOpen: false,
+        type: 'info',
+        title: '',
+        message: ''
+    });
 
     // Discussion State
     const [comments, setComments] = useState<any[]>([]);
@@ -85,7 +101,12 @@ export const EventDetailsPage = () => {
             await fetchEvent();
         } catch (error) {
             console.error("Failed to update RSVP:", error);
-            alert("Failed to update RSVP status");
+            setStatusModal({
+                isOpen: true,
+                type: 'error',
+                title: 'Update Failed',
+                message: 'Failed to update RSVP status. Please try again.'
+            });
         }
     };
 
@@ -273,6 +294,14 @@ export const EventDetailsPage = () => {
                                 count={event.endorsements?.length}
                             />
                         )}
+
+                        {(event.voting_required || isOrganizer) && event.has_awards && (
+                            <TabButton
+                                label="Vote"
+                                active={activeTab === 'vote'}
+                                onClick={() => setActiveTab('vote')}
+                            />
+                        )}
                     </div>
                 </div>
 
@@ -439,14 +468,46 @@ export const EventDetailsPage = () => {
                             </div>
                         </motion.div>
                     )}
+
+                    {activeTab === 'vote' && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                        >
+                            <VotingPoll
+                                event={event}
+                                currentUser={currentUser}
+                                onVoteSubmitted={() => {
+                                    // Optional: Show success message or redirect
+                                }}
+                                onGrantAward={(category, nomineeId) => {
+                                    setGrantAwardInitialData({ category, userId: nomineeId });
+                                    setIsGrantAwardModalOpen(true);
+                                }}
+                            />
+                        </motion.div>
+                    )}
                 </div>
             </div>
 
             <GrantAwardModal
                 isOpen={isGrantAwardModalOpen}
-                onClose={() => setIsGrantAwardModalOpen(false)}
+                onClose={() => {
+                    setIsGrantAwardModalOpen(false);
+                    setGrantAwardInitialData({ category: '', userId: '' });
+                }}
                 event={event}
                 onSuccess={() => fetchEvent()}
+                initialCategory={grantAwardInitialData.category}
+                initialUserId={grantAwardInitialData.userId}
+            />
+
+            <StatusModal
+                isOpen={statusModal.isOpen}
+                onClose={() => setStatusModal({ ...statusModal, isOpen: false })}
+                type={statusModal.type}
+                title={statusModal.title}
+                message={statusModal.message}
             />
         </div>
     );

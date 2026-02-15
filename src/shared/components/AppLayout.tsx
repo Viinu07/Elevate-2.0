@@ -45,6 +45,7 @@ const NavItem = ({ to, label, icon: Icon }: { to: string, label: string, icon: a
 export function AppLayout() {
     const [isDark, setIsDark] = useState(false);
     const [activeSpace, setActiveSpace] = useState<'connect' | 'build'>('connect');
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobile Menu State
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const currentUser = useSelector((state: RootState) => state.user.data);
@@ -59,6 +60,8 @@ export function AppLayout() {
         } else if (['/dashboard', '/events', '/recognition', '/teams'].some(r => path.startsWith(r))) {
             setActiveSpace('connect');
         }
+        // Close mobile menu on route change
+        setIsMobileMenuOpen(false);
     }, [location.pathname]);
 
     const handleSpaceSwitch = (space: 'connect' | 'build') => {
@@ -89,17 +92,45 @@ export function AppLayout() {
                 <div className={`absolute transition-all duration-1000 ${activeSpace === 'connect' ? '-bottom-[10%] left-[20%] w-[35%] h-[35%] bg-rose-400' : '-bottom-[10%] left-[20%] w-[35%] h-[35%] bg-emerald-400'} rounded-full blur-[120px]`} />
             </div>
 
-            {/* Glass Sidebar */}
-            <aside className="relative z-20 w-72 h-screen flex flex-col border-r border-white/40 dark:border-white/5 bg-white/60 dark:bg-black/40 backdrop-blur-xl">
+            {/* Mobile Menu Overlay */}
+            <AnimatePresence>
+                {isMobileMenuOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="fixed inset-0 z-30 bg-black/50 backdrop-blur-sm lg:hidden"
+                    />
+                )}
+            </AnimatePresence>
+
+            {/* Glass Sidebar - Mobile Recursive & Desktop Fixed */}
+            <aside className={`
+                fixed lg:relative z-40 w-72 h-screen flex flex-col 
+                border-r border-white/40 dark:border-white/5 
+                bg-white/60 dark:bg-black/40 backdrop-blur-xl
+                transition-transform duration-300 ease-in-out
+                ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+            `}>
                 {/* Brand */}
                 <div className="p-8 pb-4">
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center text-white">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl shadow-lg shadow-blue-500/20 flex items-center justify-center text-white">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" /></svg>
+                            </div>
+                            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300">
+                                Elevate
+                            </h1>
                         </div>
-                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300">
-                            Elevate
-                        </h1>
+                        {/* Mobile Close Button */}
+                        <button
+                            onClick={() => setIsMobileMenuOpen(false)}
+                            className="lg:hidden p-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg"
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
                     </div>
 
                     {/* Space Switcher */}
@@ -218,10 +249,18 @@ export function AppLayout() {
             {/* Main Content Area */}
             <main className="relative z-10 flex-1 flex flex-col h-screen overflow-hidden">
                 {/* Header */}
-                <header className="px-8 py-5 flex justify-between items-center backdrop-blur-sm">
-                    <div>
+                <header className="px-6 md:px-8 py-4 md:py-5 flex justify-between items-center backdrop-blur-sm">
+                    <div className="flex items-center gap-3">
+                        {/* Mobile Hamburger */}
+                        <button
+                            onClick={() => setIsMobileMenuOpen(true)}
+                            className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-300 hover:bg-white/10 rounded-lg"
+                        >
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                        </button>
+
                         {/* Dynamic Title based on Active Space */}
-                        <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">
+                        <h2 className="text-lg md:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">
                             {activeSpace === 'connect' ? 'Community & Culture' : 'Delivery & Execution'}
                         </h2>
                     </div>
@@ -233,8 +272,8 @@ export function AppLayout() {
                 </header>
 
                 {/* Content Container */}
-                <div className="flex-1 overflow-hidden px-8 pb-8">
-                    <div className="w-full h-full rounded-[32px] bg-white/70 dark:bg-[#111114]/80 backdrop-blur-xl border border-white/50 dark:border-white/5 shadow-2xl shadow-slate-200/50 dark:shadow-black/20 overflow-hidden">
+                <div className="flex-1 overflow-hidden px-4 md:px-8 pb-4 md:pb-8">
+                    <div className="w-full h-full rounded-[24px] md:rounded-[32px] bg-white/70 dark:bg-[#111114]/80 backdrop-blur-xl border border-white/50 dark:border-white/5 shadow-2xl shadow-slate-200/50 dark:shadow-black/20 overflow-hidden">
                         {/* Optional: Add AnimatePresence here too if we want page transitions, but Outlet handles routing */}
                         <Outlet />
                     </div>

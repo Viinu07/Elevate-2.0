@@ -6,6 +6,7 @@ import {
     Send
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { StatusModal } from '@/modules/common/components/StatusModal';
 import { endorsementsAPI } from '@/api/v2/endorsements';
 import { profilesAPI } from '@/api/v2/profiles';
 import type { EventDetailResponse, UserProfileFullResponse } from '@/api/v2/types';
@@ -15,12 +16,27 @@ interface GrantAwardModalProps {
     onClose: () => void;
     event: EventDetailResponse | null;
     onSuccess: () => void;
+    initialCategory?: string;
+    initialUserId?: string;
 }
 
-export const GrantAwardModal = ({ isOpen, onClose, event, onSuccess }: GrantAwardModalProps) => {
+export const GrantAwardModal = ({ isOpen, onClose, event, onSuccess, initialCategory = '', initialUserId = '' }: GrantAwardModalProps) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState('');
-    const [selectedUserId, setSelectedUserId] = useState('');
+
+    // Status Modal State
+    const [statusModal, setStatusModal] = useState<{
+        isOpen: boolean;
+        type: 'success' | 'error' | 'info';
+        title: string;
+        message: string;
+    }>({
+        isOpen: false,
+        type: 'info',
+        title: '',
+        message: ''
+    });
+    const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+    const [selectedUserId, setSelectedUserId] = useState(initialUserId);
     const [message, setMessage] = useState('');
     const [allUsers, setAllUsers] = useState<UserProfileFullResponse[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
@@ -28,6 +44,9 @@ export const GrantAwardModal = ({ isOpen, onClose, event, onSuccess }: GrantAwar
     // Fetch all users when modal opens
     useEffect(() => {
         if (isOpen) {
+            setSelectedCategory(initialCategory);
+            setSelectedUserId(initialUserId);
+
             const fetchUsers = async () => {
                 setLoadingUsers(true);
                 try {
@@ -40,7 +59,7 @@ export const GrantAwardModal = ({ isOpen, onClose, event, onSuccess }: GrantAwar
             };
             fetchUsers();
         }
-    }, [isOpen]);
+    }, [isOpen, initialCategory, initialUserId]);
 
     if (!isOpen || !event) return null;
 
@@ -51,7 +70,12 @@ export const GrantAwardModal = ({ isOpen, onClose, event, onSuccess }: GrantAwar
 
     const handleGrantAward = async () => {
         if (!selectedCategory || !selectedUserId) {
-            alert("Please select a category and a recipient");
+            setStatusModal({
+                isOpen: true,
+                type: 'info',
+                title: 'Missing Information',
+                message: 'Please select both an award category and a recipient.'
+            });
             return;
         }
 
@@ -63,16 +87,31 @@ export const GrantAwardModal = ({ isOpen, onClose, event, onSuccess }: GrantAwar
                 receiver_id: selectedUserId,
                 message: message || `Awarded for ${selectedCategory} during ${event.name}`
             });
-            alert("Award granted successfully!");
-            onSuccess();
-            onClose();
+
+            setStatusModal({
+                isOpen: true,
+                type: 'success',
+                title: 'Award Granted',
+                message: 'Award has been successfully granted!'
+            });
+
+            // Delay closing to let user see success message
+            setTimeout(() => {
+                onSuccess();
+                onClose();
+            }, 2000);
             // Reset form
             setSelectedCategory('');
             setSelectedUserId('');
             setMessage('');
         } catch (error) {
             console.error("Failed to grant award:", error);
-            alert("Failed to grant award");
+            setStatusModal({
+                isOpen: true,
+                type: 'error',
+                title: 'Grant Failed',
+                message: 'Failed to grant award. Please try again.'
+            });
         } finally {
             setIsSubmitting(false);
         }
@@ -201,6 +240,14 @@ export const GrantAwardModal = ({ isOpen, onClose, event, onSuccess }: GrantAwar
                         </button>
                     </div>
                 </motion.div>
+
+                <StatusModal
+                    isOpen={statusModal.isOpen}
+                    onClose={() => setStatusModal({ ...statusModal, isOpen: false })}
+                    type={statusModal.type}
+                    title={statusModal.title}
+                    message={statusModal.message}
+                />
             </div>
         </AnimatePresence>
     );

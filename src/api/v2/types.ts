@@ -24,6 +24,7 @@ export interface EventCreate {
     end_time?: string;
     timezone?: string;
     has_awards?: boolean;
+    voting_required?: boolean;
     award_categories?: string;
 }
 
@@ -44,6 +45,21 @@ export interface ParticipantResponse {
     user_name: string;
     rsvp_status: RSVPStatus;
     attended: boolean;
+}
+
+export interface VoteCreate {
+    event_id: string;
+    nominee_id: string;
+    award_category: string;
+    reason?: string;
+}
+
+export interface VoteCount {
+    nominee_id: string;
+    nominee_name: string;
+    nominee_avatar: string;
+    award_category: string;
+    count: number;
 }
 
 export interface RiskItem {
@@ -83,6 +99,7 @@ export interface Event {
     end_time?: string;
     timezone?: string;
     has_awards?: boolean;
+    voting_required?: boolean;
     award_categories?: string;
 }
 

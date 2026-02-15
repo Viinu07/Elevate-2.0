@@ -137,32 +137,34 @@ export default function ProfilePage() {
                         </div>
 
                         {/* Key Stats Row */}
-                        <div className="flex items-center justify-center md:justify-start gap-8 pt-2">
+                        <div className="flex items-center justify-center md:justify-start gap-4 md:gap-8 pt-2">
                             <div className="text-center md:text-left">
-                                <div className="text-2xl font-black text-slate-900 dark:text-white">{totalAwardsCount}</div>
-                                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Awards</div>
+                                <div className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">{totalAwardsCount}</div>
+                                <div className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">Awards</div>
                             </div>
                             <div className="w-px h-8 bg-slate-200 dark:bg-slate-700" />
                             <div className="text-center md:text-left">
-                                <div className="text-2xl font-black text-slate-900 dark:text-white">{endorsements.length}</div>
-                                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Endorsements</div>
+                                <div className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">{endorsements.length}</div>
+                                <div className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">Endorsements</div>
                             </div>
                             <div className="w-px h-8 bg-slate-200 dark:bg-slate-700" />
                             <div className="text-center md:text-left">
-                                <div className="text-2xl font-black text-slate-900 dark:text-white">{allMyReleases.length}</div>
-                                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Releases</div>
+                                <div className="text-xl md:text-2xl font-black text-slate-900 dark:text-white">{allMyReleases.length}</div>
+                                <div className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">Releases</div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Impact Score */}
-                    <div className="hidden md:flex flex-col items-center gap-2 pr-4 pl-4 border-l border-slate-200 dark:border-slate-700">
-                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Impact Score</div>
-                        <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-amber-400 to-orange-600 filter drop-shadow-sm">
-                            {impactScore}
-                        </div>
-                        <div className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1">
-                            <Zap size={14} className="text-amber-500 fill-amber-500" /> Level {level}
+                    {/* Impact Score - Mobile/Desktop Responsive */}
+                    <div className="flex md:flex-col items-center gap-2 md:pl-4 md:border-l border-slate-200 dark:border-slate-700 mt-6 md:mt-0 w-full md:w-auto justify-center border-t md:border-t-0 pt-6 md:pt-0">
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest text-center md:text-left">Impact Score</div>
+                        <div className="flex items-baseline gap-2 md:block">
+                            <div className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-br from-amber-400 to-orange-600 filter drop-shadow-sm">
+                                {impactScore}
+                            </div>
+                            <div className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-1 md:mt-1">
+                                <Zap size={14} className="text-amber-500 fill-amber-500" /> Level {level}
+                            </div>
                         </div>
                     </div>
                 </div>

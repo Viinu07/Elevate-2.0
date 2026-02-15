@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Users, ChevronDown, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { StatusModal } from '@/modules/common/components/StatusModal';
 import { userService, type User } from '@/api/userService';
 import { setUser } from '@/store/userSlice';
 import type { RootState } from '@/store';
@@ -11,6 +12,19 @@ export const ProfileSwitcher = () => {
     const currentUser = useSelector((state: RootState) => state.user.data);
     const [users, setUsers] = useState<User[]>([]);
     const [isOpen, setIsOpen] = useState(false);
+
+    // Status Modal State
+    const [statusModal, setStatusModal] = useState<{
+        isOpen: boolean;
+        type: 'success' | 'error' | 'info';
+        title: string;
+        message: string;
+    }>({
+        isOpen: false,
+        type: 'info',
+        title: '',
+        message: ''
+    });
 
     useEffect(() => {
         loadUsers();
@@ -38,7 +52,12 @@ export const ProfileSwitcher = () => {
             window.location.reload();
         } catch (error) {
             console.error('Login failed:', error);
-            alert('Failed to switch user. See console.');
+            setStatusModal({
+                isOpen: true,
+                type: 'error',
+                title: 'Switch Failed',
+                message: 'Failed to switch user. Please check the console for details.'
+            });
         }
     };
 
@@ -99,6 +118,14 @@ export const ProfileSwitcher = () => {
                     </>
                 )}
             </AnimatePresence>
+
+            <StatusModal
+                isOpen={statusModal.isOpen}
+                onClose={() => setStatusModal({ ...statusModal, isOpen: false })}
+                type={statusModal.type}
+                title={statusModal.title}
+                message={statusModal.message}
+            />
         </div>
     );
 };

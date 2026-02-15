@@ -97,6 +97,7 @@ async def get_event_with_relations(db: AsyncSession, event_id: str):
         end_time=event.end_time,
         timezone=event.timezone,
         has_awards=event.has_awards,
+        voting_required=event.voting_required,
         award_categories=event.award_categories
     )
 

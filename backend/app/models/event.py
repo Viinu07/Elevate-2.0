@@ -22,12 +22,15 @@ class Event(Base):
     
     # Awards Configuration
     has_awards: Mapped[bool] = mapped_column(Boolean, default=False)
+    voting_required: Mapped[bool] = mapped_column(Boolean, default=False)
     award_categories: Mapped[str | None] = mapped_column(String, nullable=True) # JSON string or comma-separated
 
     # Relationships
     organizer: Mapped["User"] = relationship("User", foreign_keys=[organizer_id])
     participants: Mapped[list["EventParticipant"]] = relationship("EventParticipant", back_populates="event", cascade="all, delete-orphan") # Linked in V2 model
     endorsements: Mapped[list["Endorsement"]] = relationship("Endorsement", back_populates="event", cascade="all, delete-orphan") # Added to fix deletion constraint
+    votes: Mapped[list["EventVote"]] = relationship("EventVote", back_populates="event", cascade="all, delete-orphan")
+
     
     @property
     def organizer_name(self) -> str:

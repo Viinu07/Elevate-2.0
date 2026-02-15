@@ -7,6 +7,8 @@ import type {
     EventListItem,
     ParticipantCreate,
     EventStatusUpdate,
+    VoteCreate,
+    VoteCount,
 } from './types';
 
 export const eventsAPI = {
@@ -85,6 +87,17 @@ export const eventsAPI = {
 
     getComments: async (eventId: string): Promise<any[]> => {
         const response = await v2Client.get<any[]>(`/events/${eventId}/comments`);
+        return response.data;
+    },
+
+    // Voting
+    vote: async (eventId: string, data: VoteCreate): Promise<boolean> => {
+        const response = await v2Client.post<boolean>(`/events/${eventId}/vote`, data);
+        return response.data;
+    },
+
+    getVotes: async (eventId: string): Promise<VoteCount[]> => {
+        const response = await v2Client.get<VoteCount[]>(`/events/${eventId}/votes`);
         return response.data;
     },
 };

@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { UserProfileModal } from '../social/components/UserProfileModal';
 import { ConfirmationModal } from '../common/components/ConfirmationModal';
+import { StatusModal } from '@/modules/common/components/StatusModal';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import type { RootState } from '@/store';
@@ -556,6 +557,19 @@ export const LiveFeedDashboard = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
+    // Status Modal State
+    const [statusModal, setStatusModal] = useState<{
+        isOpen: boolean;
+        type: 'success' | 'error' | 'info';
+        title: string;
+        message: string;
+    }>({
+        isOpen: false,
+        type: 'info',
+        title: '',
+        message: ''
+    });
+
     const [activities, setActivities] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [filterType, setFilterType] = useState<'ALL' | 'POST' | 'EVENT' | 'ENDORSEMENT' | 'RELEASE'>('ALL');
@@ -767,7 +781,12 @@ export const LiveFeedDashboard = () => {
             }
         } catch (error) {
             console.error("Failed to delete item:", error);
-            alert("Failed to delete item. You may not have permission or it may have already been deleted.");
+            setStatusModal({
+                isOpen: true,
+                type: 'error',
+                title: 'Deletion Failed',
+                message: 'Failed to delete item. You may not have permission or it may have already been deleted.'
+            });
         }
     };
 
@@ -881,6 +900,14 @@ export const LiveFeedDashboard = () => {
                 message="Are you sure you want to delete this post? This action cannot be undone."
                 confirmText="Delete"
                 isDangerous={true}
+            />
+
+            <StatusModal
+                isOpen={statusModal.isOpen}
+                onClose={() => setStatusModal({ ...statusModal, isOpen: false })}
+                type={statusModal.type}
+                title={statusModal.title}
+                message={statusModal.message}
             />
 
 

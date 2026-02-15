@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, selectinload
-from sqlalchemy import select
+from sqlalchemy import select, func
 from typing import List, Any
 from app.api import deps
 from app.schemas.v2 import event as event_schemas
 from app.services import event_service
 from app.models.user import User
 from app.models.event import Event
+
+import uuid
 
 router = APIRouter()
 
@@ -208,3 +210,104 @@ async def get_event_comments(
     )
     result = await db.execute(stmt)
     return result.scalars().all()
+
+# Voting Endpoints
+from app.models.vote import EventVote
+from app.schemas.v2 import vote as vote_schemas
+
+@router.post("/{event_id}/vote", response_model=bool)
+async def cast_vote(
+    event_id: str,
+    vote_in: vote_schemas.VoteCreate,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+) -> Any:
+    """Cast a vote for an event award nominee"""
+    # 1. Check if event exists and voting is enabled
+    event = await event_service.get_event(db, event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    if not event.voting_required and not event.has_awards:
+         raise HTTPException(status_code=400, detail="Voting is not enabled for this event")
+
+    # 2. Check if user already voted for this category
+    stmt = select(EventVote).where(
+        and_(
+            EventVote.event_id == event_id,
+            EventVote.voter_id == current_user.id,
+            EventVote.award_category == vote_in.award_category
+        )
+    )
+    result = await db.execute(stmt)
+    existing_vote = result.scalars().first()
+
+    if existing_vote:
+        # Update existing vote
+        existing_vote.nominee_id = vote_in.nominee_id
+        existing_vote.reason = vote_in.reason
+    else:
+        # Create new vote
+        new_vote = EventVote(
+            id=str(uuid.uuid4()),
+            event_id=event_id,
+            voter_id=current_user.id,
+            nominee_id=vote_in.nominee_id,
+            award_category=vote_in.award_category,
+            reason=vote_in.reason
+        )
+        db.add(new_vote)
+    
+    await db.commit()
+    return True
+
+@router.get("/{event_id}/votes", response_model=List[vote_schemas.VoteCount])
+async def get_event_votes(
+    event_id: str,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+):
+    """Get voting results (Organizer only)"""
+    event = await event_service.get_event(db, event_id)
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    if event.organizer_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Only the organizer can view voting results")
+
+    # Aggregate votes
+    # Select nominee_id, count(*), category
+    # Also need nominee details
+    
+    stmt = (
+        select(
+            EventVote.nominee_id,
+            EventVote.award_category,
+            func.count(EventVote.id).label("count")
+        )
+        .where(EventVote.event_id == event_id)
+        .group_by(EventVote.nominee_id, EventVote.award_category)
+    )
+    
+    result = await db.execute(stmt)
+    rows = result.all()
+    
+    # Fetch user details for nominees
+    nominee_ids = [row.nominee_id for row in rows]
+    stmt_users = select(User).where(User.id.in_(nominee_ids))
+    result_users = await db.execute(stmt_users)
+    users_map = {u.id: u for u in result_users.scalars().all()}
+    
+    response = []
+    for row in rows:
+        user = users_map.get(row.nominee_id)
+        if user:
+            response.append({
+                "nominee_id": row.nominee_id,
+                "nominee_name": user.name,
+                "nominee_avatar": f"https://api.dicebear.com/7.x/adventurer/svg?seed={user.name}",
+                "award_category": row.award_category,
+                "count": row.count
+            })
+            
+    return response

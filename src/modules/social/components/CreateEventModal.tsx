@@ -12,6 +12,7 @@ import {
     Trophy
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { StatusModal } from '@/modules/common/components/StatusModal';
 import { eventsAPI } from '@/api/v2/events';
 import { profilesAPI } from '@/api/v2/profiles';
 import type { UserProfileFullResponse } from '@/api/v2/types';
@@ -23,6 +24,19 @@ interface CreateEventModalProps {
 
 export const CreateEventModal = ({ isOpen, onClose }: CreateEventModalProps) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Status Modal State
+    const [statusModal, setStatusModal] = useState<{
+        isOpen: boolean;
+        type: 'success' | 'error' | 'info';
+        title: string;
+        message: string;
+    }>({
+        isOpen: false,
+        type: 'info',
+        title: '',
+        message: ''
+    });
     const [users, setUsers] = useState<UserProfileFullResponse[]>([]);
     const [eventDetails, setEventDetails] = useState({
         name: '',
@@ -36,6 +50,7 @@ export const CreateEventModal = ({ isOpen, onClose }: CreateEventModalProps) => 
         description: '',
         organizerId: '',
         hasAwards: false,
+        votingRequired: false,
         awardCategories: ''
     });
 
@@ -79,12 +94,18 @@ export const CreateEventModal = ({ isOpen, onClose }: CreateEventModalProps) => 
                 agenda: eventDetails.description,
                 organizer_id: eventDetails.organizerId, // Send selected organizer
                 has_awards: eventDetails.hasAwards,
+                voting_required: eventDetails.votingRequired,
                 award_categories: eventDetails.awardCategories
             });
             onClose();
         } catch (error) {
             console.error("Failed to create event:", error);
-            alert("Failed to create event. Please check the console for details.");
+            setStatusModal({
+                isOpen: true,
+                type: 'error',
+                title: 'Creation Failed',
+                message: 'Failed to create event. Please check the console for details.'
+            });
         } finally {
             setIsSubmitting(false);
         }
@@ -243,29 +264,44 @@ export const CreateEventModal = ({ isOpen, onClose }: CreateEventModalProps) => 
                                     </label>
                                 </div>
 
-                                <AnimatePresence>
-                                    {eventDetails.hasAwards && (
-                                        <motion.div
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: 'auto', opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            className="overflow-hidden"
-                                        >
-                                            <div className="pt-2">
-                                                <ModernInput
-                                                    label="Award Categories"
-                                                    placeholder="Use commas to separate (e.g. Best Speaker, Most Helpful)"
-                                                    value={eventDetails.awardCategories}
-                                                    onChange={(e: any) => handleEventChange('awardCategories', e.target.value)}
-                                                    icon={Trophy}
-                                                />
-                                                <p className="text-xs text-slate-500 mt-2 ml-1">
-                                                    Separated by commas. These will be available options when granting awards.
-                                                </p>
+                                {eventDetails.hasAwards && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        className="overflow-hidden space-y-4"
+                                    >
+                                        <div className="pt-2">
+                                            <ModernInput
+                                                label="Award Categories"
+                                                placeholder="Use commas to separate (e.g. Best Speaker, Most Helpful)"
+                                                value={eventDetails.awardCategories}
+                                                onChange={(e: any) => handleEventChange('awardCategories', e.target.value)}
+                                                icon={Trophy}
+                                            />
+                                            <p className="text-xs text-slate-500 mt-2 ml-1">
+                                                Separated by commas. These will be available options when granting awards.
+                                            </p>
+                                        </div>
+
+                                        {/* Voting Required Toggle */}
+                                        <div className="flex items-center justify-between p-3 bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5">
+                                            <div>
+                                                <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">Require Voting?</h4>
+                                                <p className="text-xs text-slate-500 dark:text-slate-400">Open a poll for attendees to vote</p>
                                             </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
+                                            <label className="relative inline-flex items-center cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    className="sr-only peer"
+                                                    checked={eventDetails.votingRequired}
+                                                    onChange={(e) => handleEventChange('votingRequired', e.target.checked)}
+                                                />
+                                                <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-500"></div>
+                                            </label>
+                                        </div>
+                                    </motion.div>
+                                )}
                             </div>
 
                             {/* Organizer Selection */}
@@ -314,6 +350,14 @@ export const CreateEventModal = ({ isOpen, onClose }: CreateEventModalProps) => 
                         </div>
                     </div>
                 </motion.div>
+
+                <StatusModal
+                    isOpen={statusModal.isOpen}
+                    onClose={() => setStatusModal({ ...statusModal, isOpen: false })}
+                    type={statusModal.type}
+                    title={statusModal.title}
+                    message={statusModal.message}
+                />
             </div >
         </AnimatePresence >
     );

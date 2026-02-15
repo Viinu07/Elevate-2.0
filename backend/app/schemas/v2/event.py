@@ -28,6 +28,7 @@ class EventBase(BaseModel):
     end_time: Optional[datetime] = None
     timezone: str = "UTC"
     has_awards: bool = False
+    voting_required: bool = False
     award_categories: Optional[str] = None
 
 class EventCreate(EventBase):
@@ -43,6 +44,7 @@ class EventUpdate(BaseModel):
     status: Optional[EventStatus] = None
     agenda: Optional[str] = None
     has_awards: Optional[bool] = None
+    voting_required: Optional[bool] = None
     award_categories: Optional[str] = None
 
 class EventStatusUpdate(BaseModel):

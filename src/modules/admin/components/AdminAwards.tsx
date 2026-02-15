@@ -10,6 +10,7 @@ import {
 } from '@/store/collabSlice';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Award, Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { StatusModal } from '@/modules/common/components/StatusModal';
 
 export const AdminAwards = () => {
     const dispatch = useDispatch<AppDispatch>();
@@ -23,6 +24,19 @@ export const AdminAwards = () => {
         description: ''
     });
     const [currentUserId] = useState('46a3bbe3-20ab-41f0-9d25-b5d7863170d3');
+
+    // Status Modal State
+    const [statusModal, setStatusModal] = useState<{
+        isOpen: boolean;
+        type: 'success' | 'error' | 'info';
+        title: string;
+        message: string;
+    }>({
+        isOpen: false,
+        type: 'info',
+        title: '',
+        message: ''
+    });
 
     useEffect(() => {
         dispatch(fetchAwards());
@@ -42,7 +56,12 @@ export const AdminAwards = () => {
                 await dispatch(fetchVotingResults());
             } catch (error) {
                 console.error('Failed to toggle voting status:', error);
-                alert('Failed to update voting status');
+                setStatusModal({
+                    isOpen: true,
+                    type: 'error',
+                    title: 'Update Failed',
+                    message: 'Failed to update voting status. Please try again.'
+                });
             }
         }
     };
@@ -55,8 +74,20 @@ export const AdminAwards = () => {
             setShowCreateModal(false);
             setNewCategory({ name: '', icon: '🏆', description: '' });
             dispatch(fetchAwards());
+            setStatusModal({
+                isOpen: true,
+                type: 'success',
+                title: 'Category Created',
+                message: 'New award category has been successfully created.'
+            });
         } catch (error) {
             console.error('Failed to create category:', error);
+            setStatusModal({
+                isOpen: true,
+                type: 'error',
+                title: 'Creation Failed',
+                message: 'Failed to create award category. Please try again.'
+            });
         }
     };
 
@@ -328,6 +359,14 @@ export const AdminAwards = () => {
                     </>
                 )}
             </AnimatePresence>
+
+            <StatusModal
+                isOpen={statusModal.isOpen}
+                onClose={() => setStatusModal({ ...statusModal, isOpen: false })}
+                type={statusModal.type}
+                title={statusModal.title}
+                message={statusModal.message}
+            />
         </div>
     );
 };

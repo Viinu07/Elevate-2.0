@@ -7,6 +7,9 @@ class EventBase(BaseModel):
     name: str
     date_time: datetime
     meeting_link: str
+    has_awards: bool = False
+    voting_required: bool = False
+    award_categories: Optional[str] = None
 
 # Properties to receive on creation
 class EventCreate(EventBase):
@@ -18,6 +21,9 @@ class EventUpdate(BaseModel):
     date_time: datetime | None = None
     meeting_link: str | None = None
     organizer_id: str | None = None
+    has_awards: bool | None = None
+    voting_required: bool | None = None
+    award_categories: str | None = None
 
 # Properties shared by models stored in DB
 class EventInDBBase(EventBase):
