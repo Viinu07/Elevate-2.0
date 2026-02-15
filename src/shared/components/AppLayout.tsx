@@ -4,14 +4,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { RootState, AppDispatch } from '@/store';
 import { fetchCurrentUser } from '@/store/userSlice';
-import { NotificationCenter } from '../../modules/notifications/components/v2/NotificationCenter';
-import { GlobalSearchBar } from '../../base/components/GlobalSearchBar';
+// import { NotificationCenter } from '../../modules/notifications/components/v2/NotificationCenter';
+// import { GlobalSearchBar } from '../../base/components/GlobalSearchBar';
 import { ProfileSwitcher } from './ProfileSwitcher';
 import {
     LayoutDashboard,
     Rocket,
-    TestTube2,
-    CheckSquare,
     Award,
     Calendar,
     Users,

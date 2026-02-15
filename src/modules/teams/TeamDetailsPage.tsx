@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { ArrowLeft, User as UserIcon, Send, Users, Activity, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Users, Activity } from 'lucide-react';
 import type { RootState, AppDispatch } from '../../store';
-import { fetchTeams, fetchTeamUpdates, addTeamUpdate } from '../../store/teamsSlice';
-import { addWorkItem, updateWorkItemStatus, fetchWorkItems } from '../../store/releasesSlice';
+import { fetchTeams } from '../../store/teamsSlice';
+import { fetchWorkItems } from '../../store/releasesSlice';
 import { fetchCurrentUser } from '../../store/userSlice';
 
 export default function TeamDetailsPage() {
@@ -15,26 +15,21 @@ export default function TeamDetailsPage() {
     // Tabs
     const [activeTab, setActiveTab] = useState<'updates' | 'members'>('updates');
 
-    // Form State
-    const [newUpdateContent, setNewUpdateContent] = useState('');
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
     // Redux Data
     const { teams, isLoading } = useSelector((state: RootState) => state.teams);
     const { workItems } = useSelector((state: RootState) => state.releases);
-    const currentUser = useSelector((state: RootState) => state.user.data);
 
     // Find Team
     const team = teams.find(t => t.id === teamId);
 
     // Derived Data
     const teamWorkItems = team ? workItems.filter(i => i.team === team.name) : [];
-    const activeItems = teamWorkItems.filter(i => i.status !== 'Completed');
-    const completedItems = teamWorkItems.filter(i => i.status === 'Completed');
+    // const activeItems = teamWorkItems.filter(i => i.status !== 'Completed');
+    // const completedItems = teamWorkItems.filter(i => i.status === 'Completed');
 
     // Metrics
-    const velocity = completedItems.length * 5; // Mock: 5 pts per item
-    const healthScore = 92; // Mock: could be calculated from gates passed
+    // const velocity = completedItems.length * 5; // Mock: 5 pts per item
+    // const healthScore = 92; // Mock: could be calculated from gates passed
 
     // Initial Fetch
     useEffect(() => {
@@ -141,7 +136,7 @@ export default function TeamDetailsPage() {
                                             const items = teamWorkItems.filter(i => i.status === status);
 
                                             // Status Styling
-                                            const isProposed = status === 'Proposed';
+                                            // const isProposed = status === 'Proposed';
                                             const isCommitted = status === 'Committed';
                                             const isCompleted = status === 'Completed';
 
