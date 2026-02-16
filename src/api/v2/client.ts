@@ -1,15 +1,6 @@
 
 const getBaseUrl = () => {
-    const apiUrl = import.meta.env.VITE_API_URL;
-    if (apiUrl) {
-        if (apiUrl.startsWith('/')) {
-            return `${apiUrl}/v2`;
-        }
-        if (!apiUrl.startsWith('http')) {
-            return `https://${apiUrl}/api/v2`;
-        }
-        return `${apiUrl}/api/v2`;
-    }
+    // FORCE RELATIVE PATH to use Vercel Proxy
     return '/api/v2';
 };
 
