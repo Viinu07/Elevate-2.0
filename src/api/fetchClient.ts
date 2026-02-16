@@ -1,6 +1,11 @@
 
 const getBaseUrl = () => {
+    // FORCE RELATIVE PATH to use Vercel Proxy
+    // This bypasses any incorrect VITE_API_URL env vars
+    return '/api/v1';
+
     // In production (Render), VITE_API_URL might be provided by the backend service link
+    /*
     const apiUrl = import.meta.env.VITE_API_URL;
     if (apiUrl) {
         if (apiUrl.startsWith('/')) {
@@ -14,6 +19,7 @@ const getBaseUrl = () => {
     }
     // Default for local development (uses Vite proxy)
     return '/api/v1';
+    */
 };
 
 const BASE_URL = getBaseUrl();
