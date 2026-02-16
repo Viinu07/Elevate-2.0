@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import select, func
 from typing import List, Any
@@ -32,60 +33,72 @@ async def list_events(
     from sqlalchemy import func, and_
     from app.models.social import Like, Comment
 
-    # 1. Fetch Events
-    stmt = (
-        select(Event)
-        .options(selectinload(Event.organizer))
-        .offset(skip)
-        .limit(limit)
-        .order_by(Event.date_time.desc())
-    )
-    result = await db.execute(stmt)
-    events = result.scalars().all()
+    try:
+        # 1. Fetch Events
+        stmt = (
+            select(Event)
+            .options(selectinload(Event.organizer))
+            .offset(skip)
+            .limit(limit)
+            .order_by(Event.date_time.desc())
+        )
+        result = await db.execute(stmt)
+        events = result.scalars().all()
 
-    if not events:
-        return []
+        if not events:
+            return []
 
-    event_ids = [e.id for e in events]
+        event_ids = [e.id for e in events]
 
-    # 2. Fetch Like Counts
-    stmt_likes = (
-        select(Like.event_id, func.count(Like.id))
-        .where(Like.event_id.in_(event_ids))
-        .group_by(Like.event_id)
-    )
-    result_likes = await db.execute(stmt_likes)
-    like_counts = {row[0]: row[1] for row in result_likes.all()}
+        # 2. Fetch Like Counts
+        stmt_likes = (
+            select(Like.event_id, func.count(Like.id))
+            .where(Like.event_id.in_(event_ids))
+            .group_by(Like.event_id)
+        )
+        result_likes = await db.execute(stmt_likes)
+        like_counts = {row[0]: row[1] for row in result_likes.all()}
 
-    # 3. Fetch Comment Counts
-    stmt_comments = (
-        select(Comment.event_id, func.count(Comment.id))
-        .where(Comment.event_id.in_(event_ids))
-        .group_by(Comment.event_id)
-    )
-    result_comments = await db.execute(stmt_comments)
-    comment_counts = {row[0]: row[1] for row in result_comments.all()}
+        # 3. Fetch Comment Counts
+        stmt_comments = (
+            select(Comment.event_id, func.count(Comment.id))
+            .where(Comment.event_id.in_(event_ids))
+            .group_by(Comment.event_id)
+        )
+        result_comments = await db.execute(stmt_comments)
+        comment_counts = {row[0]: row[1] for row in result_comments.all()}
 
-    # 4. Fetch User Likes
-    stmt_user_likes = (
-        select(Like.event_id)
-        .where(and_(Like.event_id.in_(event_ids), Like.user_id == current_user.id))
-    )
-    result_user_likes = await db.execute(stmt_user_likes)
-    user_liked_event_ids = set(result_user_likes.scalars().all())
+        # 4. Fetch User Likes
+        stmt_user_likes = (
+            select(Like.event_id)
+            .where(and_(Like.event_id.in_(event_ids), Like.user_id == current_user.id))
+        )
+        result_user_likes = await db.execute(stmt_user_likes)
+        user_liked_event_ids = set(result_user_likes.scalars().all())
 
-    # 5. Assemble Response
-    # We return a dict list to include extra fields not in the Pydantic model yet, or we need to update the model.
-    # For now, let's return a modified dict effectively.
-    response = []
-    for event in events:
-        event_dict = event_schemas.EventResponse.model_validate(event).model_dump()
-        event_dict['likes'] = like_counts.get(event.id, 0)
-        event_dict['comments'] = comment_counts.get(event.id, 0)
-        event_dict['liked_by_user'] = event.id in user_liked_event_ids
-        response.append(event_dict)
+        # 5. Assemble Response
+        response = []
+        for event in events:
+            event_dict = event_schemas.EventResponse.model_validate(event).model_dump()
+            event_dict['likes'] = like_counts.get(event.id, 0)
+            event_dict['comments'] = comment_counts.get(event.id, 0)
+            event_dict['liked_by_user'] = event.id in user_liked_event_ids
+            response.append(event_dict)
 
-    return response
+        return response
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"ERROR in list_events: {error_trace}")
+        # Return error as valid JSON to see it in browser/frontend
+        return JSONResponse(
+            status_code=500,
+            content={
+                "error": "Internal Server Error",
+                "message": str(e),
+                "traceback": error_trace
+            }
+        )
 
 @router.get("/{event_id}", response_model=event_schemas.EventDetailResponse)
 async def get_event(
