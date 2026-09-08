@@ -1,7 +1,7 @@
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import PostgresDsn, computed_field
-from pydantic_core import MultiHostUrl
+from pydantic import computed_field
+from sqlalchemy import URL
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Elevate API"
@@ -35,15 +35,19 @@ class Settings(BaseSettings):
 
 
     @computed_field
-    def SQLALCHEMY_DATABASE_URI(self) -> PostgresDsn:
-        return MultiHostUrl.build(
-            scheme="postgresql+asyncpg",
+    @property
+    def SQLALCHEMY_DATABASE_URI(self) -> str:
+        """Build the database URI using SQLAlchemy's URL.create which properly
+        URL-encodes special characters in usernames (e.g. dots in Supabase's
+        'postgres.projectref' format)."""
+        return str(URL.create(
+            drivername="postgresql+asyncpg",
             username=self.POSTGRES_USER,
             password=self.POSTGRES_PASSWORD,
             host=self.POSTGRES_SERVER,
             port=self.POSTGRES_PORT,
-            path=self.POSTGRES_DB,
-        )
+            database=self.POSTGRES_DB,
+        ))
 
     model_config = SettingsConfigDict(
         env_file=".env",
