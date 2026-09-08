@@ -46,3 +46,21 @@ async def health():
             "error": str(e),
             "traceback": traceback.format_exc()
         }
+
+@app.get("/debug/config")
+async def debug_config():
+    """Temporary debug endpoint — shows what env vars are loaded (remove after fixing)."""
+    import os
+    pw = settings.POSTGRES_PASSWORD
+    masked_pw = pw[:2] + "***" + pw[-2:] if len(pw) > 4 else "***"
+    return {
+        "POSTGRES_SERVER": settings.POSTGRES_SERVER,
+        "POSTGRES_USER": settings.POSTGRES_USER,
+        "POSTGRES_PASSWORD": masked_pw,
+        "POSTGRES_DB": settings.POSTGRES_DB,
+        "POSTGRES_PORT": settings.POSTGRES_PORT,
+        "FRONTEND_URL": settings.FRONTEND_URL,
+        "DB_URI_HOST": str(settings.SQLALCHEMY_DATABASE_URI).split("@")[1].split("/")[0] if "@" in str(settings.SQLALCHEMY_DATABASE_URI) else "unknown",
+        "env_POSTGRES_USER": os.environ.get("POSTGRES_USER", "NOT SET"),
+        "env_POSTGRES_SERVER": os.environ.get("POSTGRES_SERVER", "NOT SET"),
+    }
