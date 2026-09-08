@@ -30,58 +30,25 @@ async def root():
 
 @app.get("/health")
 async def health():
-    """Test database connection using direct asyncpg (bypasses SQLAlchemy URL parsing)."""
+    """Health check endpoint that tests the database connection via SQLAlchemy."""
     import traceback
-    import asyncpg
-    import ssl as ssl_mod
-
-    ssl_ctx = ssl_mod.create_default_context()
-    ssl_ctx.check_hostname = False
-    ssl_ctx.verify_mode = ssl_mod.CERT_NONE
-
     try:
-        # Direct asyncpg connection — no URL parsing, just raw parameters
-        conn = await asyncpg.connect(
-            host=settings.POSTGRES_SERVER,
-            port=settings.POSTGRES_PORT,
-            user=settings.POSTGRES_USER,
-            password=settings.POSTGRES_PASSWORD,
-            database=settings.POSTGRES_DB,
-            ssl=ssl_ctx,
-        )
-        val = await conn.fetchval("SELECT 1")
-        await conn.close()
-        return {
-            "status": "healthy",
-            "database": "connected",
-            "test_query": val,
-            "connected_as": settings.POSTGRES_USER,
-        }
+        from app.db.session import AsyncSessionLocal
+        from sqlalchemy import text
+
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(text("SELECT 1"))
+            val = result.scalar()
+            return {
+                "status": "healthy",
+                "database": "connected",
+                "test_query": val,
+            }
     except Exception as e:
         return {
             "status": "unhealthy",
             "database": "disconnected",
             "error": str(e),
             "error_type": type(e).__name__,
-            "connecting_as": settings.POSTGRES_USER,
-            "host": settings.POSTGRES_SERVER,
-            "port": settings.POSTGRES_PORT,
-            "traceback": traceback.format_exc()
+            "traceback": traceback.format_exc(),
         }
-
-@app.get("/debug/config")
-async def debug_config():
-    """Temporary debug endpoint — shows what env vars are loaded (remove after fixing)."""
-    import os
-    pw = settings.POSTGRES_PASSWORD
-    masked_pw = pw[:2] + "***" + pw[-2:] if len(pw) > 4 else "***"
-    return {
-        "POSTGRES_SERVER": settings.POSTGRES_SERVER,
-        "POSTGRES_USER": settings.POSTGRES_USER,
-        "POSTGRES_PASSWORD": masked_pw,
-        "POSTGRES_DB": settings.POSTGRES_DB,
-        "POSTGRES_PORT": settings.POSTGRES_PORT,
-        "FRONTEND_URL": settings.FRONTEND_URL,
-        "DB_URI": settings.SQLALCHEMY_DATABASE_URI,
-        "env_POSTGRES_USER": os.environ.get("POSTGRES_USER", "NOT SET"),
-    }
