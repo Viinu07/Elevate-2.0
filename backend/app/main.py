@@ -27,3 +27,22 @@ if settings.ENABLE_V2_API:
 @app.get("/")
 async def root():
     return {"message": "Welcome to Elevate API"}
+
+@app.get("/health")
+async def health():
+    """Health check endpoint that tests the database connection."""
+    import traceback
+    try:
+        from app.db.session import AsyncSessionLocal
+        from sqlalchemy import text
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(text("SELECT 1"))
+            result.scalar()
+        return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "database": "disconnected",
+            "error": str(e),
+            "traceback": traceback.format_exc()
+        }

@@ -3,10 +3,18 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.pool import NullPool
 from app.core.config import settings
 import os
+import ssl
 
 # In serverless environments (Vercel), use NullPool since connections can't be persisted
 # across invocations. For local dev, use regular connection pooling.
 is_serverless = os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME")
+
+# Create an SSL context for asyncpg — Supabase requires SSL.
+# asyncpg does NOT accept the string "require" like psycopg2 does;
+# it needs an actual ssl.SSLContext or True.
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
 
 engine_kwargs = {
     "pool_pre_ping": False,
@@ -17,10 +25,7 @@ engine_kwargs = {
         "server_settings": {
             "application_name": settings.PROJECT_NAME,
         },
-        # Supabase/Cloud DBs require SSL.
-        # For local dev, this might fail if DB doesn't support SSL, so we might make it conditional later.
-        # But for Vercel -> Supabase, it is REQUIRED.
-        "ssl": "require",
+        "ssl": ssl_context,
     }
 }
 
