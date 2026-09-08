@@ -1,28 +1,19 @@
 
 const getBaseUrl = () => {
-    // FORCE RELATIVE PATH to use Vercel Proxy
-    // This bypasses any incorrect VITE_API_URL env vars
-    return '/api/v1';
-
-    // In production (Render), VITE_API_URL might be provided by the backend service link
-    /*
     const apiUrl = import.meta.env.VITE_API_URL;
+
     if (apiUrl) {
-        if (apiUrl.startsWith('/')) {
-            return `${apiUrl}/v1`;
-        }
-        // If it's just a hostname (from Render 'host' property), add https://
-        if (!apiUrl.startsWith('http')) {
-            return `https://${apiUrl}/api/v1`;
-        }
-        return `${apiUrl}/api/v1`;
+        // Production: VITE_API_URL is the full backend URL (e.g. https://elevate2-backend.vercel.app)
+        const base = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+        return `${base}/api/v1`;
     }
-    // Default for local development (uses Vite proxy)
+
+    // Local development: uses Vite proxy (see vite.config.ts)
     return '/api/v1';
-    */
 };
 
 const BASE_URL = getBaseUrl();
+
 
 interface FetchOptions extends RequestInit {
     params?: Record<string, string | number>;

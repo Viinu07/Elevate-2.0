@@ -7,9 +7,11 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Elevate API"
     API_V1_STR: str = "/api/v1"
     
-    # CORS
+    # CORS — In production, set FRONTEND_URL to your Vercel frontend domain
+    FRONTEND_URL: str = "http://localhost:5173"
     BACKEND_CORS_ORIGINS: list[str] = [
-        "*"
+        "http://localhost:5173",
+        "http://localhost:3000",
     ]
 
     POSTGRES_SERVER: str
@@ -47,4 +49,10 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-settings = Settings()
+_settings = Settings()
+
+# Dynamically add FRONTEND_URL to CORS origins if not already present
+if _settings.FRONTEND_URL and _settings.FRONTEND_URL not in _settings.BACKEND_CORS_ORIGINS:
+    _settings.BACKEND_CORS_ORIGINS.append(_settings.FRONTEND_URL)
+
+settings = _settings
