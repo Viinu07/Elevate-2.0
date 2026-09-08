@@ -18,11 +18,6 @@ ssl_context.verify_mode = ssl.CERT_NONE
 # issues with dots in usernames (e.g. Supabase's "postgres.projectref" format).
 # When asyncpg parses a URL, it can misinterpret the dot and truncate the username.
 connect_args = {
-    "host": settings.POSTGRES_SERVER,
-    "port": settings.POSTGRES_PORT,
-    "user": settings.POSTGRES_USER,
-    "password": settings.POSTGRES_PASSWORD,
-    "database": settings.POSTGRES_DB,
     "ssl": ssl_context,
     "statement_cache_size": 0,
     "prepared_statement_cache_size": 0,
@@ -43,9 +38,8 @@ else:
     engine_kwargs["pool_size"] = settings.POSTGRES_POOL_SIZE
     engine_kwargs["max_overflow"] = settings.POSTGRES_MAX_OVERFLOW
 
-# Use a minimal URL — actual connection params come from connect_args above
 engine = create_async_engine(
-    "postgresql+asyncpg://",
+    settings.SQLALCHEMY_DATABASE_URI,
     **engine_kwargs
 )
 
