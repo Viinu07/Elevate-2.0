@@ -7,11 +7,13 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Elevate API"
     API_V1_STR: str = "/api/v1"
     
-    # CORS — In production, set FRONTEND_URL to your Vercel frontend domain
+    # CORS — In production on Vercel, allow all origins since Vercel generates
+    # unique preview URLs per deployment. Set FRONTEND_URL to your primary domain.
     FRONTEND_URL: str = "http://localhost:5173"
     BACKEND_CORS_ORIGINS: list[str] = [
         "http://localhost:5173",
         "http://localhost:3000",
+        "https://*.vercel.app",
     ]
 
     POSTGRES_SERVER: str
