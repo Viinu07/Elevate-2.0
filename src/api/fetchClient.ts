@@ -3,12 +3,13 @@ const getBaseUrl = () => {
     const apiUrl = import.meta.env.VITE_API_URL;
 
     if (apiUrl) {
-        // Production: VITE_API_URL is the full backend URL (e.g. https://elevate2-backend.vercel.app)
-        const base = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+        let base = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+        if (base.endsWith('/api')) {
+            base = base.slice(0, -4);
+        }
         return `${base}/api/v1`;
     }
 
-    // Local development: uses Vite proxy (see vite.config.ts)
     return '/api/v1';
 };
 

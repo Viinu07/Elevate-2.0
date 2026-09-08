@@ -3,7 +3,10 @@ const getBaseUrl = () => {
     const apiUrl = import.meta.env.VITE_API_URL;
 
     if (apiUrl) {
-        const base = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+        let base = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+        if (base.endsWith('/api')) {
+            base = base.slice(0, -4);
+        }
         return `${base}/api/v2`;
     }
 
