@@ -30,20 +30,42 @@ async def root():
 
 @app.get("/health")
 async def health():
-    """Health check endpoint that tests the database connection."""
+    """Test database connection using direct asyncpg (bypasses SQLAlchemy URL parsing)."""
     import traceback
+    import asyncpg
+    import ssl as ssl_mod
+
+    ssl_ctx = ssl_mod.create_default_context()
+    ssl_ctx.check_hostname = False
+    ssl_ctx.verify_mode = ssl_mod.CERT_NONE
+
     try:
-        from app.db.session import AsyncSessionLocal
-        from sqlalchemy import text
-        async with AsyncSessionLocal() as session:
-            result = await session.execute(text("SELECT 1"))
-            result.scalar()
-        return {"status": "healthy", "database": "connected"}
+        # Direct asyncpg connection — no URL parsing, just raw parameters
+        conn = await asyncpg.connect(
+            host=settings.POSTGRES_SERVER,
+            port=settings.POSTGRES_PORT,
+            user=settings.POSTGRES_USER,
+            password=settings.POSTGRES_PASSWORD,
+            database=settings.POSTGRES_DB,
+            ssl=ssl_ctx,
+        )
+        val = await conn.fetchval("SELECT 1")
+        await conn.close()
+        return {
+            "status": "healthy",
+            "database": "connected",
+            "test_query": val,
+            "connected_as": settings.POSTGRES_USER,
+        }
     except Exception as e:
         return {
             "status": "unhealthy",
             "database": "disconnected",
             "error": str(e),
+            "error_type": type(e).__name__,
+            "connecting_as": settings.POSTGRES_USER,
+            "host": settings.POSTGRES_SERVER,
+            "port": settings.POSTGRES_PORT,
             "traceback": traceback.format_exc()
         }
 
@@ -60,7 +82,6 @@ async def debug_config():
         "POSTGRES_DB": settings.POSTGRES_DB,
         "POSTGRES_PORT": settings.POSTGRES_PORT,
         "FRONTEND_URL": settings.FRONTEND_URL,
-        "DB_URI_HOST": str(settings.SQLALCHEMY_DATABASE_URI).split("@")[1].split("/")[0] if "@" in str(settings.SQLALCHEMY_DATABASE_URI) else "unknown",
+        "DB_URI": settings.SQLALCHEMY_DATABASE_URI,
         "env_POSTGRES_USER": os.environ.get("POSTGRES_USER", "NOT SET"),
-        "env_POSTGRES_SERVER": os.environ.get("POSTGRES_SERVER", "NOT SET"),
     }
