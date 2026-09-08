@@ -1,1 +1,0 @@
-import{Q as t}from"./index-sm1nmWBf.js";const n={create:async e=>(await t.post("/releases/",e)).data,list:async e=>(await t.get("/releases/",{params:e})).data,get:async e=>(await t.get(`/releases/${e}`)).data,createWorkItem:async(e,s)=>(await t.post(`/releases/${e}/work-items`,s)).data,getWorkItems:async e=>(await t.get(`/releases/${e}/work-items`)).data};export{n as r};

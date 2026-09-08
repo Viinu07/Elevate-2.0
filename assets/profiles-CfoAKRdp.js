@@ -1,1 +1,0 @@
-import{Q as s}from"./index-sm1nmWBf.js";const a={getMe:async()=>(await s.get("/profiles/me")).data,updateMe:async e=>(await s.put("/profiles/me",e)).data,list:async e=>(await s.get("/profiles/",{params:e})).data,getUser:async e=>(await s.get(`/profiles/${e}`)).data};export{a as p};
