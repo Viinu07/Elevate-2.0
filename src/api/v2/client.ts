@@ -1,6 +1,12 @@
 
 const getBaseUrl = () => {
-    // FORCE RELATIVE PATH to use Vercel Proxy
+    const apiUrl = import.meta.env.VITE_API_URL;
+
+    if (apiUrl) {
+        const base = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+        return `${base}/api/v2`;
+    }
+
     return '/api/v2';
 };
 
